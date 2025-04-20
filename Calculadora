@@ -1,0 +1,149 @@
+#funcoes matematicas -----------------------------------------------------------------------------
+def soma(numeros):
+    return sum(numeros)
+def subtracao(numeros):
+    return numeros[0] - sum(numeros[1:])
+def multiplicacao(numeros):
+    resultado = 1
+    for valor in numeros:
+        resultado *= valor
+    return resultado
+def divisao(numeros):
+    resultado = numeros[0]
+    for valor in numeros[1:]:
+        if valor == 0:
+            print("Erro: divisão por zero!")
+            return None
+        resultado /= valor
+    return resultado
+def potenciacao(numeros):
+    resultado = numeros[0]
+    for valor in numeros[1:]:
+        resultado **= valor
+    return resultado
+def raiz(numeros):
+    if len(numeros) < 2:
+        print("Erro: raiz requer dois números (radicando e índice)")
+        return None
+    radicando = numeros[0]
+    indice = numeros[1]
+    if indice == 0:
+        print("Erro: índice da raiz não pode ser zero!")
+        return None
+    return radicando ** (1 / indice)
+# ------------------------------------------------------------------------------------------------
+#funcoes gerais ----------------------------------------------------------------------------------
+def split_conta(expressao):
+    operadores = []
+    numeros = []
+    string_temp = ''
+    i = 0
+    while i < len(expressao):
+        dado = expressao[i]
+
+        # Potência **
+        if i + 1 < len(expressao) and expressao[i:i + 2] == '**':
+            if string_temp:
+                numeros.append(float(string_temp))
+                string_temp = ''
+            operadores.append('**')
+            i += 2
+            continue
+
+        # Raiz R
+        if dado == 'R':
+            if string_temp:
+                numeros.append(float(string_temp))
+                string_temp = ''
+            operadores.append('R')
+            i += 1
+            raiz_indice = ''
+            while i < len(expressao) and (expressao[i].isdigit() or expressao[i] == '.'):
+                raiz_indice += expressao[i]
+                i += 1
+            if raiz_indice:
+                numeros.append(float(raiz_indice))
+            else:
+                print("Erro: índice da raiz ausente!")
+                return [], []
+            continue
+
+        if dado.isdigit() or (dado == '.' and (string_temp or (i + 1 < len(expressao) and expressao[i + 1].isdigit()))):
+            string_temp += dado
+            i += 1
+            continue
+
+        if dado in '+-*/':
+            if string_temp:
+                numeros.append(float(string_temp))
+                string_temp = ''
+            operadores.append(dado)
+            i += 1
+            continue
+
+        i += 1
+
+    if string_temp:
+        numeros.append(float(string_temp))
+
+    return numeros, operadores
+def calcular_expressao(numeros, operadores):
+    i = 0
+    while i < len(operadores):
+        if operadores[i] == '**':
+            resultado = numeros[i] ** numeros[i + 1]
+            numeros[i] = resultado
+            del numeros[i + 1]
+            del operadores[i]
+        elif operadores[i] == 'R':
+            resultado = numeros[i] ** (1 / numeros[i + 1])
+            numeros[i] = resultado
+            del numeros[i + 1]
+            del operadores[i]
+        else:
+            i += 1
+
+    i = 0
+    while i < len(operadores):
+        if operadores[i] == '*':
+            resultado = numeros[i] * numeros[i + 1]
+            numeros[i] = resultado
+            del numeros[i + 1]
+            del operadores[i]
+        elif operadores[i] == '/':
+            resultado = numeros[i] / numeros[i + 1]
+            numeros[i] = resultado
+            del numeros[i + 1]
+            del operadores[i]
+        else:
+            i += 1
+
+    i = 0
+    while i < len(operadores):
+        if operadores[i] == '+':
+            resultado = numeros[i] + numeros[i + 1]
+            numeros[i] = resultado
+            del numeros[i + 1]
+            del operadores[i]
+        elif operadores[i] == '-':
+            resultado = numeros[i] - numeros[i + 1]
+            numeros[i] = resultado
+            del numeros[i + 1]
+            del operadores[i]
+        else:
+            i += 1
+
+    return numeros[0]
+# ------------------------------------------------------------------------------------------------
+#Retorno final -----------------------------------------------------------------------------------
+while True:
+    print("R = raiz ,** = Potencia, / = divisao, * = multiplicacao, + = soma, - = subtracao")
+    expressao = input("Digite a conta (ou 'fim' para sair): ")
+    if expressao.lower() in ('fim', '='):
+        print("Operação encerrada.")
+        break
+    # Conta
+    numeros, operadores = split_conta(expressao)
+    resultado = calcular_expressao(numeros, operadores)
+    print("Resultado:", resultado)
+# ------------------------------------------------------------------------------------------------
